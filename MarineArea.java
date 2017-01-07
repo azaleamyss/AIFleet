@@ -6,15 +6,17 @@ public class MarineArea{
     private static final int HORIZONTAL = 2;
     private static final int NEAR_ARROWABLE = 5; //他船の近くに設置を許容する確率 
     private static final int EDGE_ARROWABLE = 10; //端に設置を許容する確率
-    private static int areaWidth;
-    private static int areaHeight;
+    private int areaWidth;
+    private int areaHeight;
 
     private static int[] shipSize;
-    private static int[] log;
+    private static int[] log;//一度置けるかどうか計算した座標のログ(あまり意味がない気がする)
 
-    public static int[][] myArea;
+    public static int[][] myArea; // 2:船の位置 / 1:ダメージを受けた箇所 
+    public static int[][] enemyArea;
 
     public static ArrayList<Ship> ownFleet; //自分の艦隊
+    public Ship attackedShip;
     //艦娘のタイプ
     public static final int DESTROYER = 0;//駆逐
     public static final int LIGHT_CRUISER = 1;//軽巡
@@ -27,6 +29,7 @@ public class MarineArea{
         this.areaHeight = areaHeight;
 
         myArea = new int[areaHeight][areaWidth];
+        enemyArea = new int[areaHeight][areaWidth];
 
         log = new int[areaHeight*areaWidth];
 
@@ -44,7 +47,27 @@ public class MarineArea{
         printMyArea();
     }
 
-    private static void printMyArea(){
+    public boolean isAttacked(int x, int y){
+        if(myArea[y][x] == 1){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public void setAttackedShip(Ship theShip){
+        this.attackedShip = theShip;
+    }
+
+    public Ship getAttackedShip(){
+        return attackedShip;
+    }
+
+    public void updateMyArea(int x, int y){
+        myArea[y][x] = 1;
+    }
+
+    public void printMyArea(){
         for(int i = 0;i < 10;i++){
             for(int j = 0;j < 10;j++){
                 System.out.print(myArea[i][j]+" ");
@@ -53,7 +76,7 @@ public class MarineArea{
         }
     }
 
-    private static void setMyArea(){
+    private void setMyArea(){
         setShip(AIR_CARRIER);
         setShip(BATTLE_SHIP);
         setShip(HEAVY_CRUISER);
@@ -61,7 +84,7 @@ public class MarineArea{
         setShip(DESTROYER);
     }
 
-    private static void setShip(int shipType){
+    private void setShip(int shipType){
         int[] initShipData;
         int posX,posY;
         int shipDir;
@@ -82,7 +105,7 @@ public class MarineArea{
         setShipData(posX,posY,aShip);
     }
 
-    private static int[] getInitShipData(int shipType){
+    private int[] getInitShipData(int shipType){
         int posX,posY; 
         int shipDir;
         int randNum;
@@ -117,7 +140,7 @@ public class MarineArea{
         return data;
     }
 
-    private static void printLog(int[] alog){
+    private void printLog(int[] alog){
         int idx;
         for(int i = 0;i < areaHeight;i++){
             for(int j = 0;j < areaWidth;j++){
@@ -128,7 +151,7 @@ public class MarineArea{
         }
     }
 
-    private static boolean existLog(int x,int y){
+    private boolean existLog(int x,int y){
         int idx = y * areaHeight + x;
         if(0 < log[idx]){
             return true;
@@ -137,12 +160,12 @@ public class MarineArea{
         }
     }
 
-    private static void setLog(int x, int y){
+    private void setLog(int x, int y){
         int idx = y * areaHeight + x;
         log[idx] = 1;
     }
 
-    private static boolean canSetShip(int x, int y){
+    private boolean canSetShip(int x, int y){
         int randValue;
         if((x == 0 && y == 0) || (x == 9 && y == 0) || (x == 0 && y == 9) || (x == 9 && y == 9)){
             return false;
@@ -169,7 +192,7 @@ public class MarineArea{
         }
     }
 
-    private static int calcSuitDir(int x, int y, int shipType){
+    private int calcSuitDir(int x, int y, int shipType){
         int shipDir = 0;
         int cnt,absCnt;
         int randValue;
@@ -264,14 +287,16 @@ public class MarineArea{
         return shipDir;
     }
 
-    private static boolean isNearShip(int x, int y,int ownShipType){
+    private boolean isNearShip(int x, int y,int ownShipType){
         int difX,difY;
+        ArrayList<int[]> otherShipPos;
+
         for(Ship s: ownFleet){
-            int[][] otherShipPos = s.getShipPos();
+            otherShipPos = s.getShipPos();
             if(s.getShipType() != ownShipType){ 
-                for(int i = 0;i < s.getShipLength();i++){
-                    difX = otherShipPos[i][0] - x;
-                    difY = otherShipPos[i][1] - y;
+                for(int i = 0;i < s.getShipSize();i++){
+                    difX = otherShipPos.get(i)[0] - x;
+                    difY = otherShipPos.get(i)[1] - y;
                     double radius = Math.sqrt(difX*difX+difY*difY);//船の距離
                     if(radius <= Math.sqrt(2.0d)){
                         //半径√2以内
@@ -283,7 +308,7 @@ public class MarineArea{
         return false;
     }
 
-    private static void setShipData(int x, int y, Ship thisShip){
+    private void setShipData(int x, int y, Ship thisShip){
         int shipPiece = 1;
         int harf;
 
