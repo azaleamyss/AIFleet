@@ -1,14 +1,16 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 public class MarineArea{
     private static final int VARTICAL = 1;
     private static final int HORIZONTAL = 2;
     private static final int NEAR_ARROWABLE = 5; //他船の近くに設置を許容する確率 
     private static final int EDGE_ARROWABLE = 10; //端に設置を許容する確率
-    private int areaWidth;
-    private int areaHeight;
+    private static int areaWidth;
+    private static int areaHeight;
 
     private static int[] shipSize;
+    private static int[] log;
 
     public static int[][] myArea;
 
@@ -25,6 +27,8 @@ public class MarineArea{
         this.areaHeight = areaHeight;
 
         myArea = new int[areaHeight][areaWidth];
+
+        log = new int[areaHeight*areaWidth];
 
         shipSize = new int[5];
         shipSize[DESTROYER] = 2;
@@ -84,14 +88,16 @@ public class MarineArea{
         int randNum;
         int[] data = new int[3];
 
+        Arrays.fill(log,-1);
+
         while(true){
             posX = (int)(Math.random()*10);
             posY = (int)(Math.random()*10);
-            if(canSetShip(posX,posY)){
-                if(isNearShip(posX,posY,shipType)){
-                    randNum = (int)(Math.random()*100);
-                    if(randNum < NEAR_ARROWABLE){
-                        //近くに船があってもNEAR_ARROWABLE % で設置する
+            if(!existLog(posX,posY)){
+                if(canSetShip(posX,posY)){
+                    if(isNearShip(posX,posY,shipType)){
+                        //ダメ
+                    }else{
                         shipDir = calcSuitDir(posX,posY,shipType); 
                         if(shipDir != 0){
                             data[0] = posX;
@@ -100,41 +106,66 @@ public class MarineArea{
                             break;
                         }
                     }
-                }else{
-                    shipDir = calcSuitDir(posX,posY,shipType); 
-                    if(shipDir != 0){
-                        data[0] = posX;
-                        data[1] = posY;
-                        data[2] = shipDir;
-                        break;
-                    }
                 }
             }
+
+            setLog(posX,posY);
         }
+
+        printLog(log);
 
         return data;
     }
 
+    private static void printLog(int[] alog){
+        int idx;
+        for(int i = 0;i < areaHeight;i++){
+            for(int j = 0;j < areaWidth;j++){
+                idx = i * areaHeight + j;
+                System.out.print(alog[idx]+" ");
+            }
+            System.out.print("\n");
+        }
+    }
+
+    private static boolean existLog(int x,int y){
+        int idx = y * areaHeight + x;
+        if(0 < log[idx]){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private static void setLog(int x, int y){
+        int idx = y * areaHeight + x;
+        log[idx] = 1;
+    }
+
     private static boolean canSetShip(int x, int y){
         int randValue;
-        if(0 <= x  && x < 10 && 0 <= y && y < 10){
-            if(myArea[y][x] == 0){
-                if(x == 0 || x == 9 || y == 0 || y == 9){
-                    randValue = (int)(Math.random()*100);
-                    if(randValue < EDGE_ARROWABLE){
-                        //EDGE_ARROWABLE % の確率で端に置く
-                        return true;
+        if((x == 0 && y == 0) || (x == 9 && y == 0) || (x == 0 && y == 9) || (x == 9 && y == 9)){
+            return false;
+        }else{ 
+            if(0 <= x  && x < 10 && 0 <= y && y < 10){
+                if(myArea[y][x] == 0){
+                    if(x == 0 || x == 9 || y == 0 || y == 9){
+                        randValue = (int)(Math.random()*100);
+                        if(randValue < EDGE_ARROWABLE){
+                            //EDGE_ARROWABLE % の確率で端に置く
+                            return true;
+                        }else{
+                            return false;
+                        }
                     }else{
-                        return false;
+                        return true;
                     }
                 }else{
-                    return true;
+                    return false;
                 }
             }else{
                 return false;
             }
-        }else{
-            return false;
         }
     }
 
@@ -169,11 +200,7 @@ public class MarineArea{
 
             if(canSetShip(x,initY)){
                 if(isNearShip(x,initY,shipType)){
-                    randValue = (int)(Math.random()*100);
-                    //近くに船があってもNEAR_ARROWABLE % で設置
-                    if(randValue < NEAR_ARROWABLE){
-                        space++;
-                    }
+                    //ダメ
                 }else{
                     space++;
                 }
@@ -205,11 +232,7 @@ public class MarineArea{
 
             if(canSetShip(initX,y)){
                 if(isNearShip(initX,y,shipType)){
-                    randValue = (int)(Math.random()*100);
-                    //NEAR_ARROWABLE % の確率で設置
-                    if(randValue < NEAR_ARROWABLE){
-                        space++;
-                    }
+                    //ダメ
                 }else{
                     space++;
                 }
@@ -222,7 +245,7 @@ public class MarineArea{
             cnt++; 
 
             if(shipSize[shipType] < space){
-                hor_f = true;
+                var_f = true;
                 break;
             }
         }
@@ -235,6 +258,7 @@ public class MarineArea{
             shipDir = VARTICAL;
         }else{
             shipDir = (int)(Math.random()*2)+1;
+            System.out.println(shipDir);
         }
 
         return shipDir;
@@ -249,9 +273,8 @@ public class MarineArea{
                     difX = otherShipPos[i][0] - x;
                     difY = otherShipPos[i][1] - y;
                     double radius = Math.sqrt(difX*difX+difY*difY);//船の距離
-                    if(radius < Math.sqrt(2)){
+                    if(radius <= Math.sqrt(2.0d)){
                         //半径√2以内
-                        System.out.println("near");
                         return true;
                     }
                 }
@@ -269,7 +292,10 @@ public class MarineArea{
         int rightX = x;
         int leftX = x;
 
+        int randNum;
+
         while(shipPiece < thisShip.getShipSize()){
+            System.out.println("here");
             if(thisShip.getShipDir() == VARTICAL){
                 harf = (int)(Math.random()*2);
                 if(harf == 0){
@@ -280,7 +306,16 @@ public class MarineArea{
                             myArea[topY][x] = 2;
                             shipPiece++;
                         }else{
-                            topY++;
+                            System.out.println("late");
+                            randNum = (int)(Math.random()*100);
+                            //NEAR_ARROWABLE%で設置
+                            if(randNum < NEAR_ARROWABLE){
+                                thisShip.setShipPiece(x,topY);
+                                myArea[topY][x] = 2;
+                                shipPiece++;
+                            }else{
+                                topY++;
+                            }
                         }
                     }else{
                         topY++;
@@ -293,7 +328,16 @@ public class MarineArea{
                             myArea[underY][x] = 2;
                             shipPiece++;
                         }else{
-                            underY--;
+                            System.out.println("late");
+                            randNum = (int)(Math.random()*100);
+                            //NEAR_ARROWABLE%で設置
+                            if(randNum < NEAR_ARROWABLE){
+                                thisShip.setShipPiece(x,underY);
+                                myArea[underY][x] = 2;
+                                shipPiece++;
+                            }else{
+                                underY--;
+                            }
                         }
                     }else{
                         underY--;
@@ -309,7 +353,16 @@ public class MarineArea{
                             myArea[y][rightX] = 2;
                             shipPiece++;
                         }else{
-                            rightX--;
+                            System.out.println("late");
+                            randNum = (int)(Math.random()*100);
+                            //NEAR_ARROWABLE%で設置
+                            if(randNum < NEAR_ARROWABLE){
+                                thisShip.setShipPiece(rightX,y);
+                                myArea[y][rightX] = 2;
+                                shipPiece++;
+                            }else{
+                                rightX--;
+                            }
                         }
                     }else{
                         rightX--;
@@ -322,7 +375,16 @@ public class MarineArea{
                             myArea[y][leftX] = 2;
                             shipPiece++;
                         }else{
-                            leftX++;
+                            System.out.println("late");
+                            randNum = (int)(Math.random()*100);
+                            //NEAR_ARROWABLE%で設置
+                            if(randNum < NEAR_ARROWABLE){
+                                thisShip.setShipPiece(leftX,y);
+                                myArea[y][leftX] = 2;
+                                shipPiece++;
+                            }else{
+                                leftX++;
+                            }
                         }
                     }else{
                         leftX++;
