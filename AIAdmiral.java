@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Collections;
 import java.io.*;
 public class AIAdmiral{
     private static final int MAX_WEIGHT = 100;
@@ -13,6 +15,8 @@ public class AIAdmiral{
     //砲撃座標を決める
     public int[] order(){
         int[] target;
+
+        marineArea.fill(weightMap,0);
 
         //ニューラルネット
         weight1();
@@ -45,7 +49,7 @@ public class AIAdmiral{
                if(j == 3 || j == 6 || i == 3 || i == 6){
                    if(!isAttackedPos(j,i)){
                        //ドーナツ+延長戦
-                       weightMap[i][j] = 10;
+                       weightMap[i][j] += 10;
                    }else{
 
                    }
@@ -107,14 +111,62 @@ public class AIAdmiral{
         } 
     }
 
-
     /*砲撃座標を決定する
      * 重みが大きいところを高確率で選ぶ
      */
     private int[] decide(){
-        int[] pos = new int[2];
+        int[] point = new int[2];
 
-        return pos;
+        ArrayList<Integer> weightList = getWeightList();
+
+        int randNum;
+        int idx = 0;
+        for(int i = 0;i < weightList.size();i++){
+            idx = i;
+            randNum = (int)(Math.random()*100);
+            if(randNum < 80){
+                break;
+            }
+        }
+
+        ArrayList<int[]> slatePoints = getSlatePoints(weightList.get(idx));
+
+        randNum = (int)(Math.random()*slatePoints.size());
+        
+        return slatePoints.get(randNum);
+    }
+
+    //その重みを持つ候補点取得
+    private ArrayList<int[]> getSlatePoints(int theWeight){
+        ArrayList<int[]> points = new ArrayList<int[]>();
+        int[] point = new int[2];
+
+        for(int i = 0;i < marineArea.getHeight();i++){
+            for(int j = 0;j < marineArea.getWidth();j++){
+                if(!isAttackedPos(j,i)){
+                    if(weightMap[i][j] == theWeight){
+                        point[0] = j;
+                        point[1] = i;
+                        points.add(point.clone());
+                    } 
+                }
+            }
+        }
+        return points;
+    }
+
+    //重みのリストを取得
+    private ArrayList<Integer> getWeightList(){
+        ArrayList<Integer> theList = new ArrayList<Integer>();
+        for(int i = 0;i < marineArea.getHeight();i++){
+            for(int j = 0;j < marineArea.getWidth();j++){
+                if(!theList.contains(weightMap[i][j])){
+                    theList.add(weightMap[i][j]);
+                }
+            }
+        }
+        Collections.sort(theList, Comparator.reverseOrder());
+        return theList;
     }
 }
 

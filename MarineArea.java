@@ -49,7 +49,7 @@ public class MarineArea{
         printArea(getMyArea());
     }
 
-    private void fill(int[][] area, int value){
+    public void fill(int[][] area, int value){
         for(int i = 0;i < getHeight();i++){
             for(int j = 0;j < getWidth();j++){
                 area[i][j] = value;
