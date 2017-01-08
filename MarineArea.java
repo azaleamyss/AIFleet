@@ -310,7 +310,6 @@ public class MarineArea{
             shipDir = VARTICAL;
         }else{
             shipDir = (int)(Math.random()*2)+1;
-            System.out.println(shipDir);
         }
 
         return shipDir;
