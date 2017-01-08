@@ -443,4 +443,18 @@ public class MarineArea{
             }
         }
     }
+
+    public boolean isHit(int x, int y){
+        ArrayList<int[]> pos;
+        for(Ship s: ownFleet){
+             pos = s.getShipPos();
+            for(int i = 0;i < s.getRest();i++){
+                if(pos.get(i)[0] == x && pos.get(i)[1] == y){
+                    setAttackedShip(s);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

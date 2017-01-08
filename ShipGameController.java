@@ -36,7 +36,7 @@ public class ShipGameController{
                     if(marineArea.isAttacked(x,y)){
                         System.out.println("The point is already attacked.");
                     }else{
-                        if(isHit(x,y)){
+                        if(marineArea.isHit(x,y)){
                             theShip = marineArea.getAttackedShip();
                             theShip.removePos(x,y);
                             marineArea.updateArea(marineArea.getMyArea(),x,y,HIT);
@@ -76,19 +76,5 @@ public class ShipGameController{
                     break;
             }
         }
-    }
-
-    private static boolean isHit(int x, int y){
-        ArrayList<int[]> pos;
-        for(Ship s: marineArea.ownFleet){
-             pos = s.getShipPos();
-            for(int i = 0;i < s.getRest();i++){
-                if(pos.get(i)[0] == x && pos.get(i)[1] == y){
-                    marineArea.setAttackedShip(s);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
