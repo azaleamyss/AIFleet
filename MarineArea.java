@@ -13,9 +13,10 @@ public class MarineArea{
     private static int[] log;//一度置けるかどうか計算した座標のログ(あまり意味がない気がする)
 
     public static int[][] myArea; // 2:船の位置 / 1:ダメージを受けた箇所 
-    public static int[][] enemyArea;
+    public static int[][] enemyArea; //1:ダメージを与えた箇所 / 0: ミス / -1: 未知
 
     public static ArrayList<Ship> ownFleet; //自分の艦隊
+    public static ArrayList<Ship> enemyFleet; //敵艦隊
     public Ship attackedShip;
     //艦娘のタイプ
     public static final int DESTROYER = 0;//駆逐
