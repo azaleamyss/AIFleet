@@ -3,11 +3,13 @@ public class Ship{
     private int shipType;
     private int shipSize;
     private int shipDir;
+    private int rest;
     private boolean issink;//轟沈
     private ArrayList<int[]> shipPos;
 
     Ship(int shipType, int shipDir, int shipSize){
         issink = false;
+        rest = 0;
         this.shipType = shipType;
         this.shipSize = shipSize;
         this.shipDir = shipDir;
@@ -19,6 +21,7 @@ public class Ship{
        pos[0] = x;
        pos[1] = y;
        shipPos.add(pos);
+       rest++;
    } 
 
    public void removePos(int x, int y){
@@ -32,6 +35,7 @@ public class Ship{
            i++;
        }
        shipPos.remove(idx);
+       rest--;
        if(shipPos.size() == 0){
            issink = true;
        }
@@ -55,5 +59,9 @@ public class Ship{
 
    public int getShipType(){
        return shipType;
+   }
+
+   public int getRest(){
+       return rest;
    }
 }

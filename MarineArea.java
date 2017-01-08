@@ -30,6 +30,7 @@ public class MarineArea{
 
         myArea = new int[areaHeight][areaWidth];
         enemyArea = new int[areaHeight][areaWidth];
+        fill(enemyArea,-1);
 
         log = new int[areaHeight*areaWidth];
 
@@ -44,7 +45,31 @@ public class MarineArea{
 
         setMyArea();
 
-        printMyArea();
+        printArea(getMyArea());
+    }
+
+    private void fill(int[][] area, int value){
+        for(int i = 0;i < getHeight();i++){
+            for(int j = 0;j < getWidth();j++){
+                area[i][j] = value;
+            }
+        }
+    }
+
+    public int[][] getMyArea(){
+        return myArea;
+    }
+
+    public int[][] getEnemyArea(){
+        return enemyArea;
+    }
+
+    public int getHeight(){
+        return areaHeight;
+    }
+
+    public int getWidth(){
+        return areaWidth;
     }
 
     public boolean isAttacked(int x, int y){
@@ -63,14 +88,14 @@ public class MarineArea{
         return attackedShip;
     }
 
-    public void updateMyArea(int x, int y){
-        myArea[y][x] = 1;
+    public void updateArea(int[][] area, int x, int y, int result){
+        area[y][x] = result;
     }
 
-    public void printMyArea(){
+    public void printArea(int[][] area){
         for(int i = 0;i < 10;i++){
             for(int j = 0;j < 10;j++){
-                System.out.print(myArea[i][j]+" ");
+                System.out.print(area[i][j]+" ");
             }
             System.out.print("\n");
         }

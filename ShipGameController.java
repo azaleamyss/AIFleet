@@ -5,7 +5,10 @@ public class ShipGameController{
     private static final int ENEMY_ATTACK = 1;
     private static final int OUR_ATTACK   = 2;
     private static final int GAME_FINISH  = 3;
+    private static final int MISS = 0;
+    private static final int HIT = 1;
     private static MarineArea marineArea;
+    private static AIAdmiral admiral;
 
     public static void main(String[] args) throws IOException{
         boolean isend = false;
@@ -15,6 +18,7 @@ public class ShipGameController{
         int[] target;
 
         marineArea = new MarineArea(10,10);
+        admiral = new AIAdmiral(marineArea);
         InputStreamReader isr = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(isr);
 
@@ -35,22 +39,33 @@ public class ShipGameController{
                         if(isHit(x,y)){
                             theShip = marineArea.getAttackedShip();
                             theShip.removePos(x,y);
-                            marineArea.updateMyArea(x,y);
+                            marineArea.updateArea(marineArea.getMyArea(),x,y,HIT);
                             if(theShip.isSink()){
                                 System.out.println("Congratulation !");
                             }else{
-                                System.out.println("hit");
+                                System.out.println("hit!");
                             }
                         }else{
-                            System.out.println("miss");
+                            System.out.println("miss!");
                         }
                     }
-                    marineArea.printMyArea();
+                    marineArea.printArea(marineArea.getMyArea());
                     break;
 
                 case OUR_ATTACK: //自艦隊の砲撃
-                    target = attack();
+                    target = admiral.order();
                     System.out.println("目標: (" + target[0] + "," + target[1] + ")");
+                    System.out.print("砲撃結果: 0 - miss , 1 - hit");
+                    int result = Integer.parseInt(br.readLine());
+                    if(result == HIT){
+                        System.out.println("hit!");
+                    }else{
+                        System.out.println("miss!");
+                    }
+
+                    marineArea.updateArea(marineArea.getEnemyArea(),target[0],target[1],result);
+                    marineArea.printArea(marineArea.getEnemyArea());
+
                     break;
 
                 case GAME_FINISH:
@@ -67,7 +82,7 @@ public class ShipGameController{
         ArrayList<int[]> pos;
         for(Ship s: marineArea.ownFleet){
              pos = s.getShipPos();
-            for(int i = 0;i < s.getShipSize();i++){
+            for(int i = 0;i < s.getRest();i++){
                 if(pos.get(i)[0] == x && pos.get(i)[1] == y){
                     marineArea.setAttackedShip(s);
                     return true;
@@ -75,11 +90,5 @@ public class ShipGameController{
             }
         }
         return false;
-    }
-
-    //砲撃座標を決める
-    private static int[] attack(){
-        int[] pos = new int[2];
-        return pos; 
     }
 }
