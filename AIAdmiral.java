@@ -78,7 +78,13 @@ public class AIAdmiral{
      * 1つ飛ばし
      */
     private void weight3(){
-
+        for(int i = 0;i < marineArea.getHeight();i++){
+            for(int j = 0;j < marineArea.getWidth();j++){
+                if((i+j) % 2 == 0){
+                    weightMap[i][j] += 10;
+                }
+            }
+        }
     }
 
     /*重み付け関数4
@@ -115,8 +121,6 @@ public class AIAdmiral{
      * 重みが大きいところを高確率で選ぶ
      */
     private int[] decide(){
-        int[] point = new int[2];
-
         ArrayList<Integer> weightList = getWeightList();
 
         int randNum;
@@ -129,18 +133,15 @@ public class AIAdmiral{
             }
         }
 
-        ArrayList<int[]> slatePoints = getSlatePoints(weightList.get(idx));
-
-        randNum = (int)(Math.random()*slatePoints.size());
+        int[] slatePoint = getSlatePoint(weightList.get(idx));
         
-        return slatePoints.get(randNum);
+        return slatePoint;
     }
 
     //その重みを持つ候補点取得
-    private ArrayList<int[]> getSlatePoints(int theWeight){
+    private int[] getSlatePoint(int theWeight){
         ArrayList<int[]> points = new ArrayList<int[]>();
         int[] point = new int[2];
-
         for(int i = 0;i < marineArea.getHeight();i++){
             for(int j = 0;j < marineArea.getWidth();j++){
                 if(!isAttackedPos(j,i)){
@@ -152,7 +153,10 @@ public class AIAdmiral{
                 }
             }
         }
-        return points;
+
+        int randNum = (int)(Math.random()*points.size());
+
+        return points.get(randNum);
     }
 
     //重みのリストを取得

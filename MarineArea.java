@@ -96,7 +96,7 @@ public class MarineArea{
     public void printArea(int[][] area){
         for(int i = 0;i < 10;i++){
             for(int j = 0;j < 10;j++){
-                System.out.print(area[i][j]+" ");
+                System.out.printf("%2d ",area[i][j]);
             }
             System.out.print("\n");
         }
