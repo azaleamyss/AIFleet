@@ -67,7 +67,7 @@ public class AIAdmiral{
                if(isDonutPos(j,i)){
                    if(!isAttackedPos(j,i)){
                        //ドーナツ
-                       weightMap[i][j] += 20;
+                       weightMap[i][j] += 40;
                    }
                }
            } 
