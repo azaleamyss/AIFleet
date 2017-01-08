@@ -3,6 +3,9 @@ import java.util.Comparator;
 import java.util.Collections;
 import java.io.*;
 public class AIAdmiral{
+    private static final int DONUT_EXTENSION = 10;
+    private static final int DONUT           = 30;
+    private static final int INTERVAL        = 20;
     private static final int MAX_WEIGHT = 100;
     private MarineArea marineArea;
     private static int[][] weightMap; //重み
@@ -49,7 +52,7 @@ public class AIAdmiral{
                if(j == 3 || j == 6 || i == 3 || i == 6){
                    if(!isAttackedPos(j,i)){
                        //ドーナツ+延長戦
-                       weightMap[i][j] += 10;
+                       weightMap[i][j] += DONUT_EXTENSION;
                    }else{
 
                    }
@@ -67,7 +70,7 @@ public class AIAdmiral{
                if(isDonutPos(j,i)){
                    if(!isAttackedPos(j,i)){
                        //ドーナツ
-                       weightMap[i][j] += 40;
+                       weightMap[i][j] += DONUT;
                    }
                }
            } 
@@ -81,7 +84,7 @@ public class AIAdmiral{
         for(int i = 0;i < marineArea.getHeight();i++){
             for(int j = 0;j < marineArea.getWidth();j++){
                 if((i+j) % 2 == 0){
-                    weightMap[i][j] += 10;
+                    weightMap[i][j] += INTERVAL;
                 }
             }
         }
