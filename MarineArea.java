@@ -254,11 +254,13 @@ public class MarineArea{
                 }
             }
 
-            if(cnt > space + 1){
+            cnt++; 
+
+            if(space + 1 < cnt){
                 hor_f = false;
+                break;
             }
 
-            cnt++; 
 
             if(shipSize[shipType] < space){
                 hor_f = true;
@@ -286,11 +288,13 @@ public class MarineArea{
                 }
             }
 
-            if(cnt > space + 1){
+            cnt++; 
+
+            if(space + 1 < cnt){
                 var_f = false;
+                break;
             }
 
-            cnt++; 
 
             if(shipSize[shipType] < space){
                 var_f = true;

@@ -53,6 +53,7 @@ public class ShipGameController{
                     break;
 
                 case OUR_ATTACK: //自艦隊の砲撃
+                    System.out.println("座標計算中...");
                     target = admiral.order();
                     System.out.println("目標: (" + target[0] + "," + target[1] + ")");
                     System.out.println("砲撃結果: 0 - miss , 1 - hit");
