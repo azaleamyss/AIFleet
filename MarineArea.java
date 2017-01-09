@@ -2,8 +2,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 public class MarineArea{
-    private static final int VARTICAL = 1;
-    private static final int HORIZONTAL = 2;
+    public static final int VARTICAL = 1;
+    public static final int HORIZONTAL = 2;
     private static final int NEAR_ARROWABLE = 5; //他船の近くに設置を許容する確率 
     private static final int EDGE_ARROWABLE = 15; //端に設置を許容する確率
     private int areaWidth;
@@ -12,11 +12,11 @@ public class MarineArea{
     private static int[] shipSize;
     private static int[] log;//一度置けるかどうか計算した座標のログ(あまり意味がない気がする)
 
-    public static int[][] myArea; // 2:船の位置 / 1:ダメージを受けた箇所 
-    public static int[][] enemyArea; //1:ダメージを与えた箇所 / 0: ミス / -1: 未知
+    public static int[][] myArea; // 2:船の位置 / 1:ダメージを受けた箇所 / 0:何もない 
+    public static int[][] enemyArea; //1:船のダメージを受けた箇所 / 0: 何もない / -1: 未知
 
     public static ArrayList<Ship> ownFleet; //自分の艦隊
-    public static ArrayList<Ship> enemyFleet; //敵艦隊
+    public static ArrayList<Ship> enemyFleet; //敵残存艦隊
     public Ship attackedShip;
     //艦娘のタイプ
     public static final int DESTROYER = 0;//駆逐
@@ -33,6 +33,7 @@ public class MarineArea{
 
         myArea = new int[areaHeight][areaWidth];
         enemyArea = new int[areaHeight][areaWidth];
+        fill(myArea,0);
         fill(enemyArea,-1);
 
         log = new int[areaHeight*areaWidth];
@@ -45,10 +46,20 @@ public class MarineArea{
         shipSize[AIR_CARRIER] = 5;
 
         ownFleet = new ArrayList<Ship>();
+        enemyFleet = new ArrayList<Ship>();
+        initEnemyFleet();
 
         setMyArea();
 
         printArea(getMyArea());
+    }
+
+    //敵残存艦船リスト生成
+    private void initEnemyFleet(){
+        for(int shipType = 0;shipType < 5;shipType++){
+            Ship aShip = new Ship(shipType,shipSize[shipType]);
+            enemyFleet.add(aShip);
+        }
     }
 
     public void fill(int[][] area, int value){
@@ -297,7 +308,7 @@ public class MarineArea{
             posX = (int)(Math.random()*10);
             posY = (int)(Math.random()*10);
             if(!existLog(posX,posY)){
-                if(canSetShip(posX,posY)){
+                if(canSetMyShip(posX,posY)){
                     if(isNearShip(posX,posY,shipType)){
                         //ダメ
                     }else{
@@ -345,7 +356,21 @@ public class MarineArea{
         log[idx] = 1;
     }
 
-    private boolean canSetShip(int x, int y){
+    public boolean canSetEnemyShip(int x, int y){
+        int randValue;
+
+        if(0 <= x  && x < 10 && 0 <= y && y < 10){
+            if(enemyArea[y][x] < 0){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    public boolean canSetMyShip(int x, int y){
         int randValue;
         if((x == 0 && y == 0) || (x == 9 && y == 0) || (x == 0 && y == 9) || (x == 9 && y == 9)){
             return false;
@@ -372,89 +397,82 @@ public class MarineArea{
         }
     }
 
+    //オーバーロード
+    public boolean canSetShip(int x, int y, int shipType, int dir, boolean isMyArea){
+        boolean canSet = false;
+        int cnt = 1;
+        int space = 1;
+        int sign;
+
+        while(true){
+            if(cnt % 2 == 1){
+                sign = 1;
+            }else{
+                sign = -1;
+            }
+
+            if(dir == HORIZONTAL){
+                x = x + (sign * cnt);
+            }else{
+                y = y + (sign * cnt);
+            }
+
+            if(isMyArea){
+                if(canSetMyShip(x,y)){
+                    if(isNearShip(x,y,shipType)){
+                        //ダメ
+                    }else{
+                        space++;
+                    }
+                }
+            }else{
+                if(canSetEnemyShip(x,y)){
+                    space++;
+                }
+            }
+
+            cnt++; 
+
+            if(space + 1 < cnt){
+                canSet = false;
+                break;
+            }
+
+            if(isMyArea){
+                if(shipSize[shipType] < space){
+                    canSet = true;
+                    break;
+                }
+            }else{
+                if(shipSize[shipType] <= space){
+                    canSet = true;
+                    break;
+                }
+            }
+
+        }
+
+        System.out.println("スペースの数: "+space);
+
+        return canSet;
+    }
+
     private int calcSuitDir(int x, int y, int shipType){
         int shipDir = 0;
-        int cnt,absCnt;
         int randValue;
-        int space;
-        int sign;
         boolean var_f = true;
         boolean hor_f = true;
 
-        int initX = x;
-        int initY = y;
-
-        int topY = y;
-        int underY = y;
-        int rightX = x;
-        int leftX = x;
-
-        //水平チェック
-        cnt = 1;
-        space = 1;
-        while(true){
-            if(cnt % 2 == 1){
-                sign = 1;
-            }else{
-                sign = -1;
-            }
-
-            x = x + (sign * cnt);
-
-            if(canSetShip(x,initY)){
-                if(isNearShip(x,initY,shipType)){
-                    //ダメ
-                }else{
-                    space++;
-                }
-            }
-
-            cnt++; 
-
-            if(space + 1 < cnt){
-                hor_f = false;
-                break;
-            }
-
-
-            if(shipSize[shipType] < space){
-                hor_f = true;
-                break;
-            }
+        if(canSetShip(x,y,shipType,HORIZONTAL,true)){
+            hor_f = true;
+        }else{
+            hor_f = false;
         }
 
-        //垂直チェック
-        cnt = 1;
-        space = 1;
-        while(true){
-            if(cnt % 2 == 1){
-                sign = 1;
-            }else{
-                sign = -1;
-            }
-
-            y = y + (sign * cnt);
-
-            if(canSetShip(initX,y)){
-                if(isNearShip(initX,y,shipType)){
-                    //ダメ
-                }else{
-                    space++;
-                }
-            }
-
-            cnt++; 
-
-            if(space + 1 < cnt){
-                var_f = false;
-                break;
-            }
-
-
-            if(shipSize[shipType] < space){
-                var_f = true;
-                break;
-            }
+        if(canSetShip(x,y,shipType,VARTICAL,true)){
+            var_f = true;
+        }else{
+            var_f = false;
         }
 
         if(!var_f && !hor_f){
@@ -507,7 +525,7 @@ public class MarineArea{
                 harf = (int)(Math.random()*2);
                 if(harf == 0){
                     topY--;
-                    if(canSetShip(x,topY)){
+                    if(canSetMyShip(x,topY)){
                         if(!isNearShip(x,topY,thisShip.getShipType())){
                             thisShip.setShipPiece(x,topY);
                             myArea[topY][x] = 2;
@@ -528,7 +546,7 @@ public class MarineArea{
                     }
                 }else{
                     underY++;
-                    if(canSetShip(x,underY)){
+                    if(canSetMyShip(x,underY)){
                         if(!isNearShip(x,underY,thisShip.getShipType())){
                             thisShip.setShipPiece(x,underY);
                             myArea[underY][x] = 2;
@@ -552,7 +570,7 @@ public class MarineArea{
                 harf = (int)(Math.random()*2);
                 if(harf == 0){
                     rightX++;
-                    if(canSetShip(rightX,y)){
+                    if(canSetMyShip(rightX,y)){
                         if(!isNearShip(rightX,y,thisShip.getShipType())){
                             thisShip.setShipPiece(rightX,y);
                             myArea[y][rightX] = 2;
@@ -573,7 +591,7 @@ public class MarineArea{
                     }
                 }else{
                     leftX--;
-                    if(canSetShip(leftX,y)){
+                    if(canSetMyShip(leftX,y)){
                         if(!isNearShip(leftX,y,thisShip.getShipType())){
                             thisShip.setShipPiece(leftX,y);
                             myArea[y][leftX] = 2;

@@ -63,8 +63,10 @@ public class ShipGameController{
                     break;
 
                 case OUR_ATTACK: //自艦隊の砲撃
+                    System.out.println("\n探索モード: 1 - デフォルトシーケンス / 2 - ヒットシーケンス");
+                    int searchMode = Integer.parseInt(br.readLine());
                     System.out.println("\n座標計算中...");
-                    target = admiral.order();
+                    target = admiral.order(searchMode);
                     System.out.println("目標: (" + target[0] + "," + target[1] + ")"+"\n");
 
                     //テスト用
@@ -79,6 +81,7 @@ public class ShipGameController{
                     int result = Integer.parseInt(br.readLine());
                     if(result == HIT){
                         System.out.println("hit!");
+                        admiral.setHitPos(target[0],target[1]);
                     }else{
                         System.out.println("miss!");
                     }
@@ -99,7 +102,7 @@ public class ShipGameController{
                     break;
 
                 case PRINT_WEIGHT_MAP: //敵の重みマップ表示
-                    admiral.printWeightMap();
+                    admiral.printWeightMap(/*admiral.getWeightMapLog()*/);
                     break;
 
                 default:

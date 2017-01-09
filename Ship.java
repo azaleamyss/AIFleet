@@ -16,6 +16,14 @@ public class Ship{
         shipPos = new ArrayList<int[]>();
     }
 
+    Ship(int shipType, int shipSize){
+        issink = false;
+        rest = 0;
+        this.shipType = shipType;
+        this.shipSize = shipSize;
+        shipPos = new ArrayList<int[]>();
+    }
+
    public void setShipPiece(int x, int y){
        int[] pos = new int[2];
        pos[0] = x;
@@ -51,6 +59,10 @@ public class Ship{
 
    public int getShipDir(){
        return shipDir;
+   }
+
+   public void setShipDir(int dir){
+       this.shipDir = dir;
    }
 
    public ArrayList<int[]> getShipPos(){
