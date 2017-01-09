@@ -41,7 +41,7 @@ public class ShipGameController{
             switch(next){
                 case ENEMY_ATTACK: //敵艦隊の砲撃
                     while(true){
-                        System.out.print("\n砲撃された座標: ");
+                        System.out.print("\n砲撃された座標(,区切り): ");
                         inpos = br.readLine().split(",",0);
                         System.out.println("この座標で良い？: 1 - yes / 2 - no ");
                         int judge = Integer.parseInt(br.readLine()); 
@@ -93,6 +93,7 @@ public class ShipGameController{
                             System.out.println("miss!");
                         }
                     }
+                    /*-----------------------------------------end test*/
 
 
                     int result;

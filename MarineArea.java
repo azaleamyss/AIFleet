@@ -19,9 +19,9 @@ public class MarineArea{
     public static ArrayList<Ship> enemyFleet; //敵残存艦隊
     public Ship attackedShip;
     //艦娘のタイプ
-    public static final int DESTROYER = 0;//駆逐
-    public static final int LIGHT_CRUISER = 1;//軽巡
-    public static final int HEAVY_CRUISER = 2;//重巡
+    public static final int DESTROYER   = 0;//駆逐
+    public static final int SUBMARINE   = 1;//潜水艦
+    public static final int CRUISER     = 2;//巡洋艦
     public static final int BATTLE_SHIP = 3;//戦艦
     public static final int AIR_CARRIER = 4;//空母
 
@@ -40,8 +40,8 @@ public class MarineArea{
 
         shipSize = new int[5];
         shipSize[DESTROYER] = 2;
-        shipSize[LIGHT_CRUISER] = 3;
-        shipSize[HEAVY_CRUISER] = 3;
+        shipSize[SUBMARINE] = 3;
+        shipSize[CRUISER] = 3;
         shipSize[BATTLE_SHIP] = 4;
         shipSize[AIR_CARRIER] = 5;
 
@@ -52,22 +52,6 @@ public class MarineArea{
         setMyArea();
 
         printArea(getMyArea());
-    }
-
-    //敵残存艦船リスト生成
-    private void initEnemyFleet(){
-        for(int shipType = 0;shipType < 5;shipType++){
-            Ship aShip = new Ship(shipType,shipSize[shipType]);
-            enemyFleet.add(aShip);
-        }
-    }
-
-    public void fill(int[][] area, int value){
-        for(int i = 0;i < getHeight();i++){
-            for(int j = 0;j < getWidth();j++){
-                area[i][j] = value;
-            }
-        }
     }
 
     public int[][] getMyArea(){
@@ -86,20 +70,21 @@ public class MarineArea{
         return areaWidth;
     }
 
-    public boolean isAttacked(int x, int y){
-        if(myArea[y][x] == 1){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
     public void setAttackedShip(Ship theShip){
         this.attackedShip = theShip;
     }
 
     public Ship getAttackedShip(){
         return attackedShip;
+    }
+
+
+    //敵残存艦船リスト生成
+    private void initEnemyFleet(){
+        for(int shipType = 0;shipType < 5;shipType++){
+            Ship aShip = new Ship(shipType,shipSize[shipType]);
+            enemyFleet.add(aShip);
+        }
     }
 
     public void updateArea(int[][] area, int x, int y, int value){
@@ -116,10 +101,10 @@ public class MarineArea{
     }
 
     private void setMyArea(){
-        setShipEdge(DESTROYER,LIGHT_CRUISER);
+        setShipEdge(DESTROYER,SUBMARINE);
         setShip(AIR_CARRIER);
         setShip(BATTLE_SHIP);
-        setShip(HEAVY_CRUISER);
+        setShip(CRUISER);
     }
 
     private void setShip(int shipType){
@@ -613,6 +598,14 @@ public class MarineArea{
         }
     }
 
+    public boolean isAttacked(int x, int y){
+        if(myArea[y][x] == 1){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     public boolean isHit(int x, int y){
         ArrayList<int[]> pos;
         for(Ship s: ownFleet){
@@ -625,5 +618,13 @@ public class MarineArea{
             }
         }
         return false;
+    }
+
+    public void fill(int[][] area, int value){
+        for(int i = 0;i < getHeight();i++){
+            for(int j = 0;j < getWidth();j++){
+                area[i][j] = value;
+            }
+        }
     }
 }

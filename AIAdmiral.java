@@ -7,9 +7,13 @@ public class AIAdmiral{
     public static final int HIT_SEQUENCE = 2;
     private MarineArea marineArea;
     private static int[][] weightMap; //重み
-    private static int[][] weightMapLog;
     private int searchMode;
     //各重み
+    private static final int DONUT_EXTENSION_POINT = 10;
+    private static final int DONUT_POINT = 20;
+    private static final int INTERVAL_POINT = 20;
+    private static final int SET_SHIP_POINT = 10;
+
     private int donutExtensionPoint;
     private int donutPoint;
     private int intervalPoint;
@@ -24,11 +28,13 @@ public class AIAdmiral{
     AIAdmiral(MarineArea marineArea){
         this.marineArea = marineArea;
         weightMap = new int[marineArea.getHeight()][marineArea.getWidth()];
+
         searchMode = DEFAULT_SEQUENCE;
-        donutExtensionPoint = 10;
-        donutPoint = 20;
-        intervalPoint = 20;
-        setShipPoint = 10;
+        donutExtensionPoint = DONUT_EXTENSION_POINT;
+        donutPoint = DONUT_POINT;
+        intervalPoint = INTERVAL_POINT;
+        setShipPoint = SET_SHIP_POINT;
+
         hitPos = new int[2];
         hitPosLog = new ArrayList<int[]>();
         estimateSinkList = new ArrayList<Integer>();
@@ -42,6 +48,13 @@ public class AIAdmiral{
     public int getSearchMode(){
         return searchMode;
     }
+
+    public void setHitPos(int x, int y){
+        this.hitPos[0] = x;
+        this.hitPos[1] = y;
+        hitPosLog.add(hitPos.clone());
+    }
+
 
     //轟沈した船のリストを追加する
     public void setEstimateSinkList(){
@@ -212,38 +225,9 @@ public class AIAdmiral{
         }
     }
 
-    private int calcError(int shipSize){
-        int error_cnt = 1;
-        for(Integer in: estimateSinkList){
-            if(in == shipSize){
-                error_cnt++;
-            }
-        }
-        return error_cnt;
-    }
-
-
     private void weightB(){
         weightB(MarineArea.VARTICAL);
         weightB(MarineArea.HORIZONTAL);
-    }
-
-    //フォーカスをずらす
-    private int[] shiftFocus(int[] focus, int topFocus, int shiftDir){
-        int[][] enemyArea = marineArea.getEnemyArea();
-        int[] shifted = focus;
-        int startPosX = hitPos[0];
-        int startPosY = hitPos[1];
-
-        for(int i = 0;i < focus.length;i++){
-            if(shiftDir == MarineArea.HORIZONTAL){
-                shifted[i] = enemyArea[startPosY][i+topFocus]; 
-            }else{
-                shifted[i] = enemyArea[i+topFocus][startPosX];
-            }
-        }
-
-        return shifted;
     }
 
     //オーバーロード
@@ -296,15 +280,34 @@ public class AIAdmiral{
         }
     }
 
-    public int[][] getWeightMapLog(){
-        return weightMapLog;
+    private int calcError(int shipSize){
+        int error_cnt = 1;
+        for(Integer in: estimateSinkList){
+            if(in == shipSize){
+                error_cnt++;
+            }
+        }
+        return error_cnt;
     }
 
-    public void setHitPos(int x, int y){
-        this.hitPos[0] = x;
-        this.hitPos[1] = y;
-        hitPosLog.add(hitPos.clone());
+    //フォーカスをずらす
+    private int[] shiftFocus(int[] focus, int topFocus, int shiftDir){
+        int[][] enemyArea = marineArea.getEnemyArea();
+        int[] shifted = focus;
+        int startPosX = hitPos[0];
+        int startPosY = hitPos[1];
+
+        for(int i = 0;i < focus.length;i++){
+            if(shiftDir == MarineArea.HORIZONTAL){
+                shifted[i] = enemyArea[startPosY][i+topFocus]; 
+            }else{
+                shifted[i] = enemyArea[i+topFocus][startPosX];
+            }
+        }
+
+        return shifted;
     }
+
 
     //ドーナツ
     private boolean isDonutPos(int x, int y){
