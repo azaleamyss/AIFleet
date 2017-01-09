@@ -70,28 +70,9 @@ public class ShipGameController{
                     break;
 
                 case OUR_ATTACK: //自艦隊の砲撃
-                    int searchMode;
-                    while(true){
-                        System.out.println("\n探索モード: 1 - デフォルトシーケンス / 2 - ヒットシーケンス");
-                        searchMode = Integer.parseInt(br.readLine());
-
-                        if(0 < searchMode && searchMode < 3){
-                            if(searchMode == 2){
-                                if(admiral.haveHit()){
-                                    break;
-                                }else{
-                                    System.out.println("まだヒットしていません");
-                                }
-                            }else{
-                                break;
-                            }
-                        }else{
-                            System.out.println("正しい値を入力して下さい");
-                        }
-                    }
 
                     System.out.println("\n座標計算中...");
-                    target = admiral.order(searchMode);
+                    target = admiral.order();
                     System.out.println("\n目標: (" + target[0] + "," + target[1] + ")"+"\n");
 
                     //テスト用
@@ -115,13 +96,13 @@ public class ShipGameController{
 
                     if(result == HIT){
                         System.out.println("hit!");
-                        admiral.setHaveHit(true);
                         admiral.setHitPos(target[0],target[1]);
                         admiral.increaseDamage();
+                        admiral.setSearchMode(AIAdmiral.HIT_SEQUENCE);//ヒットシーケンスに移行
                         System.out.println("\n1 - ヒットのみ / 2 - 敵艦轟沈");
                         if(Integer.parseInt(br.readLine()) == 2){
                             System.out.println("轟沈!");
-                            admiral.setEstimateSinkShip();
+                            admiral.setEstimateSinkList();
                         }
                     }else{
                         System.out.println("miss!");
