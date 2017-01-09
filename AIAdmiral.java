@@ -54,6 +54,10 @@ public class AIAdmiral{
         damage = damage+1;
     }
 
+    public int getDamage(){
+        return damage;
+    }
+
     //砲撃座標を決める
     public int[] order(){
         int[] target;
@@ -220,9 +224,8 @@ public class AIAdmiral{
 
 
     private void weightB(){
-        int[][] enemyArea = marineArea.getEnemyArea();
-        int startPosX = hitPos[0];
-        int startPosY = hitPos[1];
+        weightB(MarineArea.VARTICAL);
+        weightB(MarineArea.HORIZONTAL);
     }
 
     //フォーカスをずらす
@@ -270,13 +273,15 @@ public class AIAdmiral{
                 for(int j = 0;j < theSize;j++){
                     if(focusShip[j] < 0){
                         unknown++;
-                    }else if(focusShip[j] == 1){
+                    }
+
+                    else if(focusShip[j] == 1){
                         hit++;
                     }
                 }
 
                 //重みを足す
-                if(unknown+hit == theSize){
+                if((unknown+hit == theSize) && (hit == getDamage())){
                     for(int k = 0;k < theSize;k++){
                         if(focusShip[k] < 0){
                             if(shipDir == MarineArea.HORIZONTAL){

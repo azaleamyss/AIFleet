@@ -75,13 +75,25 @@ public class ShipGameController{
                     target = admiral.order();
                     System.out.println("\n目標: (" + target[0] + "," + target[1] + ")"+"\n");
 
-                    //テスト用
-                    int r = test(target);
-                    if(r == HIT){
-                        System.out.println("echo : HIT!");
+                    //テスト
+                    if(testArea.isAttacked(target[0],target[1])){
+                        //ご動作
+                        System.out.println("The point is already attacked.");
                     }else{
-                        System.out.println("echo : MISS!");
+                        if(testArea.isHit(target[0],target[1])){
+                            theShip = testArea.getAttackedShip();
+                            theShip.removePos(target[0],target[1]);
+                            testArea.updateArea(testArea.getMyArea(),target[0],target[1],HIT);
+                            if(theShip.isSink()){
+                                System.out.println("轟沈 !");
+                            }else{
+                                System.out.println("hit!");
+                            }
+                        }else{
+                            System.out.println("miss!");
+                        }
                     }
+
 
                     int result;
                     while(true){
@@ -95,7 +107,6 @@ public class ShipGameController{
                     }
 
                     if(result == HIT){
-                        System.out.println("hit!");
                         admiral.setHitPos(target[0],target[1]);
                         admiral.increaseDamage();
                         admiral.setSearchMode(AIAdmiral.HIT_SEQUENCE);//ヒットシーケンスに移行
@@ -103,9 +114,8 @@ public class ShipGameController{
                         if(Integer.parseInt(br.readLine()) == 2){
                             System.out.println("轟沈!");
                             admiral.setEstimateSinkList();
+                            admiral.setSearchMode(AIAdmiral.DEFAULT_SEQUENCE);
                         }
-                    }else{
-                        System.out.println("miss!");
                     }
 
                     marineArea.updateArea(marineArea.getEnemyArea(),target[0],target[1],result);
@@ -130,16 +140,6 @@ public class ShipGameController{
                 default:
                     break;
             }
-        }
-    }
-
-    //テスト
-    private static int test(int[] target){
-        int[][] map = testArea.getMyArea();
-        if(map[target[1]][target[0]] == 2){
-            return 1;
-        }else{
-            return 0;
         }
     }
 }
