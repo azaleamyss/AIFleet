@@ -6,13 +6,17 @@ public class AIAdmiral{
     private static final int DONUT_EXTENSION = 10;
     private static final int DONUT           = 30;
     private static final int INTERVAL        = 20;
-    private static final int MAX_WEIGHT = 100;
+
+    private static final int FIRST = 0;
+    private static final int KNOWN = 1;
     private MarineArea marineArea;
     private static int[][] weightMap; //重み
+    private int mode;
 
     AIAdmiral(MarineArea marineArea){
         this.marineArea = marineArea;
         weightMap = new int[marineArea.getHeight()][marineArea.getWidth()];
+        mode = FIRST;
     }
 
     //砲撃座標を決める
@@ -21,26 +25,20 @@ public class AIAdmiral{
 
         marineArea.fill(weightMap,0);
 
-        //ニューラルネット
-        weight1();
-        weight2();
-        weight3();
-        weight4();
+        //ニューラルネット(1-4は共通の重み付け)
+        if(mode == FIRST){
+            weight1();
+            weight2();
+            weight3();
+            weight4();
+            weight5();
+        }else if(mode == KNOWN){
 
-        printWeightMap();
+        }
 
         target = decide();
 
         return target; 
-    }
-
-    private void printWeightMap(){
-        for(int i = 0;i < marineArea.getHeight();i++){
-            for(int j = 0;j < marineArea.getWidth();j++){
-                System.out.printf("%3d ",weightMap[i][j]);
-            }
-            System.out.print("\n");
-        }
     }
 
     /*重み付け関数1
@@ -91,9 +89,17 @@ public class AIAdmiral{
     }
 
     /*重み付け関数4
-     * 船の位置が割れてるとき
+     * 船の位置がわかっているとき
      */
     private void weight4(){
+        int[][] enemyArea = marineArea.getEnemyArea();//ヒットしている座標がわかる
+        //船ごと確認する
+        for(Ship s: marineArea.enemyFleet){
+
+        }
+    }
+
+    private void weight5(){
 
     }
 
@@ -174,6 +180,16 @@ public class AIAdmiral{
         }
         Collections.sort(theList, Comparator.reverseOrder());
         return theList;
+    }
+
+    //重みマップ表示
+    public void printWeightMap(){
+        for(int i = 0;i < marineArea.getHeight();i++){
+            for(int j = 0;j < marineArea.getWidth();j++){
+                System.out.printf("%3d ",weightMap[i][j]);
+            }
+            System.out.print("\n");
+        }
     }
 }
 

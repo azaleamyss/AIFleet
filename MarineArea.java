@@ -5,7 +5,7 @@ public class MarineArea{
     private static final int VARTICAL = 1;
     private static final int HORIZONTAL = 2;
     private static final int NEAR_ARROWABLE = 5; //他船の近くに設置を許容する確率 
-    private static final int EDGE_ARROWABLE = 10; //端に設置を許容する確率
+    private static final int EDGE_ARROWABLE = 15; //端に設置を許容する確率
     private int areaWidth;
     private int areaHeight;
 
@@ -24,6 +24,8 @@ public class MarineArea{
     public static final int HEAVY_CRUISER = 2;//重巡
     public static final int BATTLE_SHIP = 3;//戦艦
     public static final int AIR_CARRIER = 4;//空母
+
+    private boolean existShipEdge = false;
 
     MarineArea(int areaWidth, int areaHeight){
         this.areaWidth = areaWidth;
@@ -89,8 +91,8 @@ public class MarineArea{
         return attackedShip;
     }
 
-    public void updateArea(int[][] area, int x, int y, int result){
-        area[y][x] = result;
+    public void updateArea(int[][] area, int x, int y, int value){
+        area[y][x] = value;
     }
 
     public void printArea(int[][] area){
@@ -103,11 +105,10 @@ public class MarineArea{
     }
 
     private void setMyArea(){
+        setShipEdge(DESTROYER,LIGHT_CRUISER);
         setShip(AIR_CARRIER);
         setShip(BATTLE_SHIP);
         setShip(HEAVY_CRUISER);
-        setShip(LIGHT_CRUISER);
-        setShip(DESTROYER);
     }
 
     private void setShip(int shipType){
@@ -126,9 +127,162 @@ public class MarineArea{
         ownFleet.add(aShip);
 
         myArea[posY][posX] = 2;
-        System.out.println("set first point");
 
         setShipData(posX,posY,aShip);
+        System.out.println("The ship have been set.");
+    }
+
+    //端に置く
+    private void setShipEdge(int shipType1, int shipType2){
+        Ship shipA = null;
+        Ship shipB = null;
+        int[][] edgePos = {{0,0},{9,0},{0,9},{9,9}};
+        int randIdx = (int)(Math.random()*4);
+        int randDir = (int)(Math.random()*2)+1;
+
+        int[] cruiserPos = edgePos[randIdx];
+
+        if(shipSize[shipType1] < shipSize[shipType2]){
+            shipA = new Ship(shipType2,randDir,shipSize[shipType2]);
+        }else if(shipSize[shipType2] < shipSize[shipType1]){
+            shipA = new Ship(shipType1,randDir,shipSize[shipType1]); 
+        }
+
+        switch(randIdx){
+            case 0:
+                for(int i = 0;i < shipA.getShipSize();i++){
+                    if(shipA.getShipDir() == HORIZONTAL){
+                        shipA.setShipPiece(i,0);
+                    }else{
+                        shipA.setShipPiece(0,i);
+                    }
+                }
+
+                if(shipA.getShipDir() == HORIZONTAL){
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,VARTICAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,VARTICAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(0,i+1);
+                    }
+                }else{
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,HORIZONTAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,HORIZONTAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(i+1,0);
+                    }
+                }
+                break;
+
+            case 1:
+                for(int i = 0;i < shipA.getShipSize();i++){
+                    if(shipA.getShipDir() == HORIZONTAL){
+                        shipA.setShipPiece(9-i,0);
+                    }else{
+                        shipA.setShipPiece(9,i);
+                    }
+                }
+
+                if(shipA.getShipDir() == HORIZONTAL){
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,VARTICAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,VARTICAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(9,i+1);
+                    }
+                }else{
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,HORIZONTAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,HORIZONTAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(9-i-1,0);
+                    }
+                }
+
+                break;
+
+            case 2:
+                for(int i = 0;i < shipA.getShipSize();i++){
+                    if(shipA.getShipDir() == HORIZONTAL){
+                        shipA.setShipPiece(i,9);
+                    }else{
+                        shipA.setShipPiece(0,9-i);
+                    }
+                }
+
+                if(shipA.getShipDir() == HORIZONTAL){
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,VARTICAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,VARTICAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(0,9-i-1);
+                    }
+                }else{
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,HORIZONTAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,HORIZONTAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(i+1,9);
+                    }
+                }
+                break;
+
+            case 3:
+                for(int i = 0;i < shipA.getShipSize();i++){
+                    if(shipA.getShipDir() == HORIZONTAL){
+                        shipA.setShipPiece(9-i,9);
+                    }else{
+                        shipA.setShipPiece(9,9-i);
+                    }
+                }
+                if(shipA.getShipDir() == HORIZONTAL){
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,VARTICAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,VARTICAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(9,9-i-1);
+                    }
+                }else{
+                    if(shipA.getShipType() == shipType2){
+                        shipB = new Ship(shipType1,HORIZONTAL,shipSize[shipType1]);
+                    }else{
+                        shipB = new Ship(shipType2,HORIZONTAL,shipSize[shipType2]);
+                    }
+                    for(int i = 0;i < shipB.getShipSize();i++){
+                        shipB.setShipPiece(9-i-1,9);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        ownFleet.add(shipA);
+        ownFleet.add(shipB);
+
+        for(Ship edgeShip: ownFleet){
+            if(edgeShip.getShipType() == shipA.getShipType() || edgeShip.getShipType() == shipB.getShipType()){
+                ArrayList<int[]> pos = edgeShip.getShipPos();
+                for(int i = 0;i < edgeShip.getShipSize();i++){
+                    updateArea(myArea,pos.get(i)[0],pos.get(i)[1],2);
+                }
+            }
+        }
     }
 
     private int[] getInitShipData(int shipType){
@@ -161,7 +315,7 @@ public class MarineArea{
             setLog(posX,posY);
         }
 
-        printLog(log);
+        //printLog(log);
 
         return data;
     }
@@ -349,7 +503,6 @@ public class MarineArea{
         int randNum;
 
         while(shipPiece < thisShip.getShipSize()){
-            System.out.println("here");
             if(thisShip.getShipDir() == VARTICAL){
                 harf = (int)(Math.random()*2);
                 if(harf == 0){
@@ -360,7 +513,6 @@ public class MarineArea{
                             myArea[topY][x] = 2;
                             shipPiece++;
                         }else{
-                            System.out.println("late");
                             randNum = (int)(Math.random()*100);
                             //NEAR_ARROWABLE%で設置
                             if(randNum < NEAR_ARROWABLE){
@@ -382,7 +534,6 @@ public class MarineArea{
                             myArea[underY][x] = 2;
                             shipPiece++;
                         }else{
-                            System.out.println("late");
                             randNum = (int)(Math.random()*100);
                             //NEAR_ARROWABLE%で設置
                             if(randNum < NEAR_ARROWABLE){
@@ -407,7 +558,6 @@ public class MarineArea{
                             myArea[y][rightX] = 2;
                             shipPiece++;
                         }else{
-                            System.out.println("late");
                             randNum = (int)(Math.random()*100);
                             //NEAR_ARROWABLE%で設置
                             if(randNum < NEAR_ARROWABLE){
@@ -429,7 +579,6 @@ public class MarineArea{
                             myArea[y][leftX] = 2;
                             shipPiece++;
                         }else{
-                            System.out.println("late");
                             randNum = (int)(Math.random()*100);
                             //NEAR_ARROWABLE%で設置
                             if(randNum < NEAR_ARROWABLE){
