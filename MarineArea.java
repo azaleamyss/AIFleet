@@ -452,8 +452,6 @@ public class MarineArea{
 
         }
 
-        System.out.println("スペースの数: "+space);
-
         return canSet;
     }
 

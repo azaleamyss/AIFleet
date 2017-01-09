@@ -18,17 +18,9 @@ public class AIAdmiral{
 
     private int[] hitPos;//ヒットした時の座標
     private ArrayList<int[]> hitPosLog;//ヒットした座標のログ
-
-    //組み合わせ
-    private static int[][] mass1 = {{0,1},{1,0},{0,0,1},{0,1,0},{1,0,0},{0,0,0,1},{0,0,1,0},{0,1,0,0},{1,0,0,0},
-                                 {0,0,0,0,1},{0,0,0,1,0},{0,0,1,0,0},{0,1,0,0,0},{1,0,0,0,0}};
-
-    private static int[][] mass2 = {{0,1,1},{1,1,0},{0,0,1,1},{0,1,1,0},{1,1,0,0},
-                                 {0,0,0,1,1},{0,0,1,1,0},{0,1,1,0,0},{1,1,0,0,0}};
-
-    private static int[][] mass3 = {{0,1,1,1},{1,1,1,0},{0,0,1,1,1},{0,1,1,1,0},{1,1,1,0,0}};
-
-    private static int[][] mass4 = {{0,1,1,1,1},{1,1,1,1,0}};
+    private ArrayList<Integer> estimateSinkList;//仮轟沈リスト
+    private boolean havehit;
+    private int damage;
 
     AIAdmiral(MarineArea marineArea){
         this.marineArea = marineArea;
@@ -40,6 +32,30 @@ public class AIAdmiral{
         setShipPoint = 5;
         hitPos = new int[2];
         hitPosLog = new ArrayList<int[]>();
+        estimateSinkList = new ArrayList<Integer>();
+        damage = 0;
+
+        havehit = false;//ヒットフラグ
+    }
+
+    //轟沈した船のサイズを記憶
+    public void setEstimateSinkShip(){
+        estimateSinkList.add(damage);
+        System.out.println("echo-d : "+damage);
+        damage = 0;
+    }
+
+    //相手にヒットさせたときに加算
+    public void increaseDamage(){
+        damage = damage+1;
+    }
+
+    public boolean haveHit(){
+        return havehit;
+    }
+
+    public void setHaveHit(boolean val){
+        this.havehit = val;
     }
 
     //砲撃座標を決める
@@ -54,6 +70,7 @@ public class AIAdmiral{
         
         switch(searchMode){
             case DEFAULT_SEQUENCE:
+                setHaveHit(false);
                 targetWeight = 80;
                 weight1();
                 weight2();
@@ -202,8 +219,24 @@ public class AIAdmiral{
         int[][] enemyArea = marineArea.getEnemyArea();
         int startPosX = hitPos[0];
         int startPosY = hitPos[1];
+    }
 
-        //組み合わせによる配置
+    //フォーカスをずらす
+    private int[] shiftFocus(int[] focus, int topFocus, int shiftDir){
+        int[][] enemyArea = marineArea.getEnemyArea();
+        int[] shifted = focus;
+        int startPosX = hitPos[0];
+        int startPosY = hitPos[1];
+
+        for(int i = 0;i < focus.length;i++){
+            if(shiftDir == MarineArea.HORIZONTAL){
+                shifted[i] = enemyArea[startPosY][i+topFocus]; 
+            }else{
+                shifted[i] = enemyArea[i+topFocus][startPosX];
+            }
+        }
+
+        return shifted;
     }
 
     //オーバーロード
@@ -211,12 +244,46 @@ public class AIAdmiral{
         int[][] enemyArea = marineArea.getEnemyArea();
         int startPosX = hitPos[0];
         int startPosY = hitPos[1];
+        int unknown = 0;
+        int hit = 0;
 
         //組み合わせによる配置
-    }
+        //残存している艦船を置けるかどうか
+        for(Ship s: marineArea.enemyFleet){
+            //残存艦船ごと確認
+            int theSize = s.getShipSize();
+            int[] focusShip = new int[theSize];
 
-    private void weightC(){
+            for(int topFucus = 0;topFucus < 10-theSize+1;topFucus++){
+                unknown = 0;
+                hit = 0;
 
+                //フォーカスをずらす
+                focusShip = shiftFocus(focusShip,topFucus,shipDir);
+
+                //パターンチェック
+                for(int j = 0;j < theSize;j++){
+                    if(focusShip[j] < 0){
+                        unknown++;
+                    }else if(focusShip[j] == 1){
+                        hit++;
+                    }
+                }
+
+                //重みを足す
+                if(unknown+hit == theSize){
+                    for(int k = 0;k < theSize;k++){
+                        if(focusShip[k] < 0){
+                            if(shipDir == MarineArea.HORIZONTAL){
+                                weightMap[startPosY][topFucus+k] += setShipPoint;
+                            }else{
+                                weightMap[topFucus+k][startPosX] += setShipPoint;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public int[][] getWeightMapLog(){

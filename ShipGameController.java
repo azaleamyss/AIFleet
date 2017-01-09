@@ -40,8 +40,15 @@ public class ShipGameController{
 
             switch(next){
                 case ENEMY_ATTACK: //敵艦隊の砲撃
-                    System.out.print("\n砲撃された座標: ");
-                    inpos = br.readLine().split(",",0);
+                    while(true){
+                        System.out.print("\n砲撃された座標: ");
+                        inpos = br.readLine().split(",",0);
+                        System.out.println("この座標で良い？: 1 - yes / 2 - no ");
+                        int judge = Integer.parseInt(br.readLine()); 
+                        if(judge == 1){
+                            break;
+                        }
+                    }
                     int x = Integer.parseInt(inpos[0]);
                     int y = Integer.parseInt(inpos[1]);
                     if(marineArea.isAttacked(x,y)){
@@ -63,11 +70,29 @@ public class ShipGameController{
                     break;
 
                 case OUR_ATTACK: //自艦隊の砲撃
-                    System.out.println("\n探索モード: 1 - デフォルトシーケンス / 2 - ヒットシーケンス");
-                    int searchMode = Integer.parseInt(br.readLine());
+                    int searchMode;
+                    while(true){
+                        System.out.println("\n探索モード: 1 - デフォルトシーケンス / 2 - ヒットシーケンス");
+                        searchMode = Integer.parseInt(br.readLine());
+
+                        if(0 < searchMode && searchMode < 3){
+                            if(searchMode == 2){
+                                if(admiral.haveHit()){
+                                    break;
+                                }else{
+                                    System.out.println("まだヒットしていません");
+                                }
+                            }else{
+                                break;
+                            }
+                        }else{
+                            System.out.println("正しい値を入力して下さい");
+                        }
+                    }
+
                     System.out.println("\n座標計算中...");
                     target = admiral.order(searchMode);
-                    System.out.println("目標: (" + target[0] + "," + target[1] + ")"+"\n");
+                    System.out.println("\n目標: (" + target[0] + "," + target[1] + ")"+"\n");
 
                     //テスト用
                     int r = test(target);
@@ -77,11 +102,27 @@ public class ShipGameController{
                         System.out.println("echo : MISS!");
                     }
 
-                    System.out.println("砲撃結果: 0 - miss , 1 - hit");
-                    int result = Integer.parseInt(br.readLine());
+                    int result;
+                    while(true){
+                        System.out.println("砲撃結果: 0 - miss , 1 - hit");
+                        result = Integer.parseInt(br.readLine());
+                        if(result == 0 || result == 1){
+                            break;
+                        }else{
+                            System.out.println("正しい値を入力して下さい");
+                        }
+                    }
+
                     if(result == HIT){
                         System.out.println("hit!");
+                        admiral.setHaveHit(true);
                         admiral.setHitPos(target[0],target[1]);
+                        admiral.increaseDamage();
+                        System.out.println("\n1 - ヒットのみ / 2 - 敵艦轟沈");
+                        if(Integer.parseInt(br.readLine()) == 2){
+                            System.out.println("轟沈!");
+                            admiral.setEstimateSinkShip();
+                        }
                     }else{
                         System.out.println("miss!");
                     }
