@@ -77,7 +77,7 @@ public class AIAdmiral{
 
         marineArea.fill(weightMap,0);
 
-        /*ニューラルネット*/
+        /*評価関数*/
         
         switch(searchMode){
             case DEFAULT_SEQUENCE:
