@@ -33,11 +33,21 @@ public class ShipGameController{
 
         boolean isend = false;
         while(!isend){
-            System.out.println("\n敵艦隊の砲撃 - 1 / 自艦隊の砲撃 - 2 / ゲーム終了 - 3");
-            System.out.println("敵エリア表示 - 4 / 自エリア表示 - 5 / 敵重みマップ表示 - 6");
-            System.out.print("Next Mode: ");
-            int next = Integer.parseInt(br.readLine());
+            boolean next_f = false;
+            String input = null;
+            while(!next_f){
+                System.out.println("\n敵艦隊の砲撃 - 1 / 自艦隊の砲撃 - 2 / ゲーム終了 - 3");
+                System.out.println("敵エリア表示 - 4 / 自エリア表示 - 5 / 敵重みマップ表示 - 6");
+                System.out.print("Next Mode: ");
+                input = br.readLine();
+                for(int k = 1;k < 7;k++){
+                    if(input.equals(""+k)){
+                        next_f = true;
+                    }
+                } 
+            }
 
+            int next = Integer.parseInt(input);
             switch(next){
                 case ENEMY_ATTACK: //敵艦隊の砲撃
                     boolean return_f = false;
@@ -77,7 +87,6 @@ public class ShipGameController{
                         target = admiral.order();
                         System.out.println("\n目標: (" + (target[0]+1) + "," + (target[1]+1)+ ")"+"\n");
 
-                        String input;
                         while(true){
                             System.out.println("砲撃結果: 0 - miss , 1 - hit");
                             input = br.readLine();
@@ -131,7 +140,7 @@ public class ShipGameController{
     }
 
     private static boolean isCorrectSelection(String selection, BufferedReader br) throws IOException{
-        System.out.println(selection +" ? : y / n");
+        System.out.println("\n"+selection +" ? : y / n");
         String judge = br.readLine();
         if(judge.equals("y")){
             return true;
